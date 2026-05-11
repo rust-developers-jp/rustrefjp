@@ -1,20 +1,27 @@
 name: Deploy PR previews
 
 on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: pull request number
+        required: true
+        type: number
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [closed]
 
 permissions:
   contents: write
   pull-requests: write
 
 concurrency:
-  group: pr-${{ github.event.pull_request.number }}
+  group: pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   cancel-in-progress: true
 
 env:
-  PAGE_DIR: pr-preview-${{ github.event.pull_request.number }}
-  BASE_PATH: /preview/pr-preview-${{ github.event.pull_request.number }}
+  PR_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  PAGE_DIR: pr-preview-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  BASE_PATH: /preview/pr-preview-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
 
 jobs:
   build-and-commit:
@@ -23,6 +30,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ env.PR_NUMBER }}/head
 
       - name: Build Check
         uses: ./.github/actions/build
@@ -45,7 +54,7 @@ jobs:
           cp -r -f /tmp/out/* ./preview/${{env.PAGE_DIR}}
           touch ./preview/${{env.PAGE_DIR}}/.nojekyll || true
           git add .
-          git commit -m "Deploy PR preview for #${{ github.event.pull_request.number }}"
+          git commit -m "Deploy PR preview for #${{ env.PR_NUMBER }}"
           git push origin gh-pages
 
       - name: Comment PR
@@ -77,4 +86,4 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "Remove PR preview for #${{ github.event.pull_request.number }}" && git push origin gh-pages || echo "No changes to commit"
+          git commit -m "Remove PR preview for #${{ env.PR_NUMBER }}" && git push origin gh-pages || echo "No changes to commit"
