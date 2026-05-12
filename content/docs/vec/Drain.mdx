@@ -261,6 +261,8 @@ where
 { /* trait methods */ }
 ```
 
+## 自動トレイト実装
+
 ### `std::marker::Freeze`
 
 ```rust
@@ -294,6 +296,63 @@ impl<'a, T, A> std::panic::UnwindSafe for Drain<'a, T, A>
 where
     T: std::panic::RefUnwindSafe,
     A: std::panic::RefUnwindSafe
+{ /* trait methods */ }
+```
+
+## ブランケット実装
+
+```rust
+impl<T> Any for T
+where
+    T: 'static + ?Sized
+{ /* trait methods */ }
+```
+
+```rust
+impl<T> Borrow<T> for T
+where
+    T: ?Sized
+{ /* trait methods */ }
+```
+
+```rust
+impl<T> BorrowMut<T> for T
+where
+    T: ?Sized
+{ /* trait methods */ }
+```
+
+```rust
+impl<T> From<T> for T { 
+    /* trait methods */ 
+}
+```
+
+```rust
+impl<T, U> Into<U> for T
+where
+    U: From<T>
+{ /* trait methods */ }
+```
+
+```rust
+impl<I> IntoIterator for I
+where
+    I: Iterator,
+{ /* trait methods */ }
+```
+
+```rust
+impl<T, U> TryFrom<U> for T
+where
+    U: Into<T>
+{ /* trait methods */ }
+```
+
+```rust
+impl<T, U> TryInto<U> for T
+where
+    U: TryFrom<T>
 { /* trait methods */ }
 ```
 
